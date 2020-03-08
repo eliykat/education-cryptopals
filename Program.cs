@@ -7,12 +7,16 @@ namespace Cryptopals
         static void Main(string[] args)
         {
 
-            string hexString = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-            byte[] barray = hexToBytes(hexString);
+            string inputString = "1c0111001f010100061a024b53535009181c",
+                keyString = "686974207468652062756c6c277320657965",
+                requiredString = "746865206b696420646f6e277420706c6179";
 
-            string test = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+            byte[] inputBytes = hexToBytes(inputString),
+                keyBytes = hexToBytes(keyString);
 
-            Console.WriteLine(test == prettyPrint64(barray));
+            string output = prettyPrint16(xorByteArrays(inputBytes, keyBytes));
+
+            Console.WriteLine(requiredString == output);
         }
 
         static byte[] hexToBytes(string hex)
@@ -45,6 +49,18 @@ namespace Cryptopals
 
         static string prettyPrint64(byte[] barray) {
             return Convert.ToBase64String(barray);
+        }
+
+        static byte[] xorByteArrays(byte[] barray1, byte[] barray2)
+        {
+            byte[] result = new byte[barray1.Length];
+
+            for (int i=0; i<barray1.Length; i++)
+            {
+                result[i] = (byte)(barray1[i] ^ barray2[i]);
+            }
+
+            return result;
         }
     }
 }
