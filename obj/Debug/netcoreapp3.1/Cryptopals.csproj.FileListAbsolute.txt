@@ -1,0 +1,10 @@
+/Users/tom/Projects/Cryptopals/Cryptopals/bin/Debug/netcoreapp3.1/Cryptopals.deps.json
+/Users/tom/Projects/Cryptopals/Cryptopals/bin/Debug/netcoreapp3.1/Cryptopals.runtimeconfig.json
+/Users/tom/Projects/Cryptopals/Cryptopals/bin/Debug/netcoreapp3.1/Cryptopals.runtimeconfig.dev.json
+/Users/tom/Projects/Cryptopals/Cryptopals/bin/Debug/netcoreapp3.1/Cryptopals.dll
+/Users/tom/Projects/Cryptopals/Cryptopals/bin/Debug/netcoreapp3.1/Cryptopals.pdb
+/Users/tom/Projects/Cryptopals/Cryptopals/obj/Debug/netcoreapp3.1/Cryptopals.csprojAssemblyReference.cache
+/Users/tom/Projects/Cryptopals/Cryptopals/obj/Debug/netcoreapp3.1/Cryptopals.AssemblyInfoInputs.cache
+/Users/tom/Projects/Cryptopals/Cryptopals/obj/Debug/netcoreapp3.1/Cryptopals.AssemblyInfo.cs
+/Users/tom/Projects/Cryptopals/Cryptopals/obj/Debug/netcoreapp3.1/Cryptopals.dll
+/Users/tom/Projects/Cryptopals/Cryptopals/obj/Debug/netcoreapp3.1/Cryptopals.pdb
