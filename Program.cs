@@ -65,18 +65,27 @@ namespace Cryptopals
             // as per wikipedia page
 
             string plainText = "Error";
-            int highScore = 100,
+            double highScore = 100,
                 currentScore;
 
-            Dictionary<string, int> alphabet = new Dictionary<string, int>
+            Dictionary<string, double> alphabet = new Dictionary<string, double>
             {
-                { "e", 12 },
-                { "t", 9 },
-                { "a", 8 }
+                { "e", 0.12702 },
+                { "t", 0.09356 },
+                { "a", 0.08167 },
+                { "o", 0.07507 },
+                { "i", 0.06966 },
+                { "n", 0.06749 },
+                { "s", 0.06327 },
+                { "h", 0.06094 }, 
+                { "r", 0.05987 },
+                { "d", 0.04253 },
+                { "l", 0.04025 },
+                { "u", 0.02758 }
             };
 
             byte[] testPlainBytes;
-            string testPlainText;
+            string testPlainText, regexPattern;
             int charCount;
 
             // Test range of possible single character keys
@@ -94,16 +103,16 @@ namespace Cryptopals
                 currentScore = 0;
                 byte[] testKey = { Convert.ToByte(i) };
 
+
                 testPlainBytes = xorByteArrays(cipherBytes, testKey);
                 testPlainText = System.Text.Encoding.UTF8.GetString(testPlainBytes);
 
-                foreach (KeyValuePair<string, int> letter in alphabet)
+                foreach (KeyValuePair<string, double> letter in alphabet)
                 {
-                    charCount = new Regex(Regex.Escape(letter.Key)).Matches(testPlainText).Count;
-                    if (charCount > 0)
-                    {
-                        currentScore += Math.Abs(letter.Value - (testPlainText.Length / charCount));
-                    }
+                    regexPattern = @"[" + letter.Key + letter.Key.ToLower() + "]";
+
+                    charCount = new Regex(regexPattern).Matches(testPlainText).Count;
+                    currentScore += Math.Abs(letter.Value - (charCount / testPlainText.Length));
                 }
 
                 Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
