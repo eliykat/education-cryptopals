@@ -68,6 +68,8 @@ namespace Cryptopals
             double highScore = 100,
                 currentScore;
 
+            // Dictionary representing most common characters in English language
+            // and their relative frequency
             Dictionary<string, double> alphabet = new Dictionary<string, double>
             {
                 { "e", 0.12702 },
@@ -86,18 +88,9 @@ namespace Cryptopals
 
             byte[] testPlainBytes;
             string testPlainText, regexPattern;
-            int charCount;
+            double charCount;
 
             // Test range of possible single character keys
-
-            // FOR EACH, DIVIDE NUMBER OF OCCURRENCES INTO LENGTH OF SENTENCE
-            // SUBTRACT FROM EXPECTED FREQUENCY
-            // AVERAGE RESULTS
-            // THE LOWEST SCORE WINS
-            // OTHER NOTES:
-            // - REMEMBER TO CONVERT EVERYTHING TO LOWERCASE (can probably do this in the regex rather than actually converting)
-            // - USE THE AVERAGE, NOT JUST THE SUM
-
             for (int i = 0; i < 127; i++)
             {
                 currentScore = 0;
@@ -107,6 +100,12 @@ namespace Cryptopals
                 testPlainBytes = xorByteArrays(cipherBytes, testKey);
                 testPlainText = System.Text.Encoding.UTF8.GetString(testPlainBytes);
 
+                // Find the frequency of most common letters and subtract from their expected frequency
+                // The sum of this result is the plain text's score.
+                // The lowest score indicates the least deviation from the expected frequency.
+                // This works for Set 1/Challenge 3, but if required in the future,
+                // we could return a top 10 list rather than a single winner.
+
                 foreach (KeyValuePair<string, double> letter in alphabet)
                 {
                     regexPattern = @"[" + letter.Key + letter.Key.ToLower() + "]";
@@ -115,17 +114,16 @@ namespace Cryptopals
                     currentScore += Math.Abs(letter.Value - (charCount / testPlainText.Length));
                 }
 
-                Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
+                // Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
 
                 if (currentScore < highScore)
                 {
                     plainText = testPlainText;
                     highScore = currentScore;
-                    Console.WriteLine("New high score!");
                 }
             }
 
-            Console.WriteLine("We have a winner!");
+            Console.WriteLine("Most likely plaintext based on frequency analysis:");
             Console.WriteLine(plainText);
 
         }
