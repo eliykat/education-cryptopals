@@ -65,20 +65,30 @@ namespace Cryptopals
             // as per wikipedia page
 
             string plainText = "Error";
-            int highScore = 0,
+            int highScore = 100,
                 currentScore;
 
             Dictionary<string, int> alphabet = new Dictionary<string, int>
             {
-                { "e", 127 },
-                { "t", 94 },
-                { "a", 82 }
+                { "e", 12 },
+                { "t", 9 },
+                { "a", 8 }
             };
 
             byte[] testPlainBytes;
             string testPlainText;
+            int charCount;
 
             // Test range of possible single character keys
+
+            // FOR EACH, DIVIDE NUMBER OF OCCURRENCES INTO LENGTH OF SENTENCE
+            // SUBTRACT FROM EXPECTED FREQUENCY
+            // AVERAGE RESULTS
+            // THE LOWEST SCORE WINS
+            // OTHER NOTES:
+            // - REMEMBER TO CONVERT EVERYTHING TO LOWERCASE (can probably do this in the regex rather than actually converting)
+            // - USE THE AVERAGE, NOT JUST THE SUM
+
             for (int i = 0; i < 127; i++)
             {
                 currentScore = 0;
@@ -89,12 +99,16 @@ namespace Cryptopals
 
                 foreach (KeyValuePair<string, int> letter in alphabet)
                 {
-                    currentScore += new Regex(Regex.Escape(letter.Key)).Matches(testPlainText).Count;
+                    charCount = new Regex(Regex.Escape(letter.Key)).Matches(testPlainText).Count;
+                    if (charCount > 0)
+                    {
+                        currentScore += Math.Abs(letter.Value - (testPlainText.Length / charCount));
+                    }
                 }
 
                 Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
 
-                if (currentScore > highScore)
+                if (currentScore < highScore)
                 {
                     plainText = testPlainText;
                     highScore = currentScore;
