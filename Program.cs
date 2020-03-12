@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Cryptopals
 {
@@ -7,16 +9,9 @@ namespace Cryptopals
         static void Main(string[] args)
         {
 
-            string inputString = "1c0111001f010100061a024b53535009181c",
-                keyString = "686974207468652062756c6c277320657965",
-                requiredString = "746865206b696420646f6e277420706c6179";
+            string inputString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
 
-            byte[] inputBytes = hexToBytes(inputString),
-                keyBytes = hexToBytes(keyString);
-
-            string output = prettyPrint16(xorByteArrays(inputBytes, keyBytes));
-
-            Console.WriteLine(requiredString == output);
+            frequencyAnalysis(hexToBytes(inputString));
         }
 
         static byte[] hexToBytes(string hex)
@@ -57,10 +52,59 @@ namespace Cryptopals
 
             for (int i=0; i<barray1.Length; i++)
             {
-                result[i] = (byte)(barray1[i] ^ barray2[i]);
+                result[i] = (byte)(barray1[i] ^ barray2[i % barray2.Length]);
             }
 
             return result;
+        }
+
+        static void frequencyAnalysis(byte[] cipherBytes)
+        {
+            // Simple frequency analysis by scoring the top 3 most common letters
+            // They are assigned a weight that is the integer representation of their relative %
+            // as per wikipedia page
+
+            string plainText = "Error";
+            int highScore = 0,
+                currentScore;
+
+            Dictionary<string, int> alphabet = new Dictionary<string, int>
+            {
+                { "e", 127 },
+                { "t", 94 },
+                { "a", 82 }
+            };
+
+            byte[] testPlainBytes;
+            string testPlainText;
+
+            // Test range of possible single character keys
+            for (int i = 0; i < 127; i++)
+            {
+                currentScore = 0;
+                byte[] testKey = { Convert.ToByte(i) };
+
+                testPlainBytes = xorByteArrays(cipherBytes, testKey);
+                testPlainText = System.Text.Encoding.UTF8.GetString(testPlainBytes);
+
+                foreach (KeyValuePair<string, int> letter in alphabet)
+                {
+                    currentScore += new Regex(Regex.Escape(letter.Key)).Matches(testPlainText).Count;
+                }
+
+                Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
+
+                if (currentScore > highScore)
+                {
+                    plainText = testPlainText;
+                    highScore = currentScore;
+                    Console.WriteLine("New high score!");
+                }
+            }
+
+            Console.WriteLine("We have a winner!");
+            Console.WriteLine(plainText);
+
         }
     }
 }
