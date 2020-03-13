@@ -10,6 +10,9 @@ namespace Cryptopals
         static void Main(string[] args)
         {
 
+            List<string> likelyPlainTexts = new List<string>();
+            string result;
+
             try
             {
                 using (StreamReader sr = new StreamReader("/Users/tom/Projects/Cryptopals/4.txt"))
@@ -17,14 +20,7 @@ namespace Cryptopals
                     string line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        Console.WriteLine(line);
-                        // Do stuff here!
-                        // e.g. convert each line into its most likely plaintext guess
-                        // then compare all plaintext guesses to find the best one, based on same frequency analysis
-                        // (but without the need to xor with different keys)
-
-                        // note: refactor frequency analysis function to just take an array of strings and compare them.
-                        // separate function can produce the array by xoring every possible single bit key against the ciphertext.
+                        likelyPlainTexts.Add(bruteForceSingleBitXOR(hexToBytes(line)));
                     }
                 }
             }
@@ -33,6 +29,11 @@ namespace Cryptopals
                 Console.WriteLine("Error - file could not be read:");
                 Console.WriteLine(e.Message);
             }
+
+            result = frequencyAnalysis(likelyPlainTexts);
+
+            Console.WriteLine("And the winner is:");
+            Console.WriteLine(result);
 
         }
 
