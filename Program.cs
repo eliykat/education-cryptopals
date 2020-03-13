@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -8,10 +9,29 @@ namespace Cryptopals
     {
         static void Main(string[] args)
         {
+            try
+            {
+                using (StreamReader sr = new StreamReader("/Users/tom/Projects/Cryptopals/4.txt"))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        Console.WriteLine(line);
+                        // Do stuff here!
+                        // e.g. convert each line into its most likely plaintext guess
+                        // then compare all plaintext guesses to find the best one, based on same frequency analysis
+                        // (but without the need to xor with different keys)
 
-            string inputString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-
-            frequencyAnalysis(hexToBytes(inputString));
+                        // note: refactor frequency analysis function to just take an array of strings and compare them.
+                        // separate function can produce the array by xoring every possible single bit key against the ciphertext.
+                    }
+                }
+            } catch (Exception e)
+            {
+                Console.WriteLine("Error - file could not be read:");
+                Console.WriteLine(e.Message);
+            }
+        
         }
 
         static byte[] hexToBytes(string hex)
