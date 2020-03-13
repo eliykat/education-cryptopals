@@ -9,6 +9,7 @@ namespace Cryptopals
     {
         static void Main(string[] args)
         {
+
             try
             {
                 using (StreamReader sr = new StreamReader("/Users/tom/Projects/Cryptopals/4.txt"))
@@ -26,12 +27,13 @@ namespace Cryptopals
                         // separate function can produce the array by xoring every possible single bit key against the ciphertext.
                     }
                 }
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 Console.WriteLine("Error - file could not be read:");
                 Console.WriteLine(e.Message);
             }
-        
+
         }
 
         static byte[] hexToBytes(string hex)
@@ -78,15 +80,17 @@ namespace Cryptopals
             return result;
         }
 
-        static void frequencyAnalysis(byte[] cipherBytes)
+        static string frequencyAnalysis(List<string> inputList)
         {
             // Simple frequency analysis by scoring the top 3 most common letters
             // They are assigned a weight that is the integer representation of their relative %
             // as per wikipedia page
 
-            string plainText = "Error";
+            string plainText = "Error - frequency analysis did not return any likely match",
+                regexPattern;
             double highScore = 100,
-                currentScore;
+                currentScore,
+                charCount;
 
             // Dictionary representing most common characters in English language
             // and their relative frequency
@@ -106,19 +110,10 @@ namespace Cryptopals
                 { "u", 0.02758 }
             };
 
-            byte[] testPlainBytes;
-            string testPlainText, regexPattern;
-            double charCount;
-
             // Test range of possible single character keys
-            for (int i = 0; i < 127; i++)
+            foreach (string input in inputList)
             {
                 currentScore = 0;
-                byte[] testKey = { Convert.ToByte(i) };
-
-
-                testPlainBytes = xorByteArrays(cipherBytes, testKey);
-                testPlainText = System.Text.Encoding.UTF8.GetString(testPlainBytes);
 
                 // Find the frequency of most common letters and subtract from their expected frequency
                 // The sum of this result is the plain text's score.
@@ -130,21 +125,37 @@ namespace Cryptopals
                 {
                     regexPattern = @"[" + letter.Key + letter.Key.ToLower() + "]";
 
-                    charCount = new Regex(regexPattern).Matches(testPlainText).Count;
-                    currentScore += Math.Abs(letter.Value - (charCount / testPlainText.Length));
+                    charCount = new Regex(regexPattern).Matches(input).Count;
+                    currentScore += Math.Abs(letter.Value - (charCount / input.Length));
                 }
-
-                // Console.WriteLine("Score: " + currentScore + " for string " + testPlainText);
 
                 if (currentScore < highScore)
                 {
-                    plainText = testPlainText;
+                    plainText = input;
                     highScore = currentScore;
                 }
             }
 
-            Console.WriteLine("Most likely plaintext based on frequency analysis:");
-            Console.WriteLine(plainText);
+            return plainText;
+
+        }
+
+        static string bruteForceSingleBitXOR(byte[] cipherBytes)
+        {
+            // Tries a range of single-bit keys against XOR'd ciphertext
+            // and returns the most likely plaintext based on frequency analysis
+
+            List<string> testPlainText = new List<string>();
+
+            // Construct array of test plain texts
+            for (int i = 0; i < 127; i++)
+            {
+                byte[] testKey = { Convert.ToByte(i) };
+
+                testPlainText.Add(System.Text.Encoding.UTF8.GetString(xorByteArrays(cipherBytes, testKey)));
+            }
+
+            return frequencyAnalysis(testPlainText);
 
         }
     }
