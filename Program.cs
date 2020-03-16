@@ -9,32 +9,17 @@ namespace Cryptopals
     {
         static void Main(string[] args)
         {
+            string plainText1 = "Burning 'em, if you ain't quick and nimble" + Environment.NewLine + "I go crazy when I hear a cymbal",
+                key = "ICE",
+                test1 = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272" +
+                    "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
 
-            List<string> likelyPlainTexts = new List<string>();
-            string result;
+            byte[] bytes1 = System.Text.Encoding.UTF8.GetBytes(plainText1),
+                keyBytes = System.Text.Encoding.UTF8.GetBytes(key);
 
-            try
-            {
-                using (StreamReader sr = new StreamReader("/Users/tom/Projects/Cryptopals/4.txt"))
-                {
-                    string line;
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                        likelyPlainTexts.Add(bruteForceSingleBitXOR(hexToBytes(line)));
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error - file could not be read:");
-                Console.WriteLine(e.Message);
-            }
+            string result1 = prettyPrint16(xorByteArrays(bytes1, keyBytes));
 
-            result = frequencyAnalysis(likelyPlainTexts);
-
-            Console.WriteLine("And the winner is:");
-            Console.WriteLine(result);
-
+            Console.WriteLine("Passed: {0}", test1 == result1);
         }
 
         static byte[] hexToBytes(string hex)
@@ -59,7 +44,7 @@ namespace Cryptopals
 
             for (int i = 0; i< barray.Length; i++)
             {
-                prettyString += Convert.ToString(barray[i], 16);
+                prettyString += barray[i].ToString("X2").ToLower();
             }
 
             return prettyString;
