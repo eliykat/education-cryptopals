@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Text;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 namespace Cryptopals
 {
@@ -9,17 +11,26 @@ namespace Cryptopals
     {
         static void Main(string[] args)
         {
-            string plainText1 = "Burning 'em, if you ain't quick and nimble" + Environment.NewLine + "I go crazy when I hear a cymbal",
-                key = "ICE",
-                test1 = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272" +
-                    "a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f";
+            string string1 = "this is a test",
+                string2 = "wokka wokka!!!";
 
-            byte[] bytes1 = System.Text.Encoding.UTF8.GetBytes(plainText1),
-                keyBytes = System.Text.Encoding.UTF8.GetBytes(key);
+            Console.WriteLine(hemmingDistance(Encoding.UTF8.GetBytes(string1), Encoding.UTF8.GetBytes(string2)));
+        }
 
-            string result1 = prettyPrint16(xorByteArrays(bytes1, keyBytes));
+        static int hemmingDistance(byte[] barray1, byte[] barray2)
+        {
+            byte[] xorResult = xorByteArrays(barray1, barray2);
 
-            Console.WriteLine("Passed: {0}", test1 == result1);
+            BitArray xorResultBits = new BitArray(xorResult);
+
+            int count = 0;
+
+            foreach (bool bit in xorResultBits)
+            {
+                if (bit) count++;
+            }
+
+            return count;
         }
 
         static byte[] hexToBytes(string hex)
