@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Collections;
+using System.Linq;
 
 namespace Cryptopals
 {
@@ -11,6 +12,12 @@ namespace Cryptopals
     {
         static void Main(string[] args)
         {
+
+            // Sanity test
+            Console.WriteLine("Wokka wokka!! is {0}", hammingDistance(
+                Encoding.UTF8.GetBytes("this is a test"),
+                Encoding.UTF8.GetBytes("wokka wokka!!!")));
+
             try
             {
                 using (StreamReader sr = new StreamReader("/Users/tom/Projects/Cryptopals/6.txt"))
@@ -19,18 +26,15 @@ namespace Cryptopals
                     string ciphertext = sr.ReadToEnd(),
                         plaintext;
 
-                    byte[] cipherbytes = new byte[ciphertext.Length],
+                    byte[] cipherbytes = base64ToBytes(ciphertext),
                         key;
 
-                    cipherbytes = Encoding.UTF8.GetBytes(ciphertext);
-
                     key = breakVigenere(cipherbytes);
+
                     plaintext = Encoding.UTF8.GetString(xorByteArrays(cipherbytes, key));
 
-
-                    Console.WriteLine("Key is {0}", Encoding.UTF8.GetString(key));
-                    Console.WriteLine("Plaintext is {0}", plaintext);
-
+                    Console.WriteLine("Key is: {0}", Encoding.UTF8.GetString(key));
+                    Console.WriteLine("Plaintext is: {0}", plaintext);
                 }
             }
             catch (Exception e)
@@ -89,54 +93,48 @@ namespace Cryptopals
         static int breakVigenereKeysize(byte[] ciphertext)
         {
 
-            int guess = 0;
-            double highScore = 100;
+            Dictionary<int, double> likelyKeys = new Dictionary<int, double>();
+            KeyValuePair<int, double> result = new KeyValuePair<int, double>(0, 100);
 
             // Try keysizes from 4 - 40
             for (int keysize = 4; keysize < 41; keysize++)
             {
 
-                byte[] block1 = new byte[keysize],
-                    block2 = new byte[keysize],
-                    block3 = new byte[keysize],
-                    block4 = new byte[keysize];
+                int blocksInText = ciphertext.Length / keysize;
+                double[] hammings = new double[blocksInText];
 
-                Array.Copy(ciphertext, block1, keysize);
-                Array.Copy(ciphertext, keysize, block2, 0, keysize);
-                Array.Copy(ciphertext, keysize * 2, block3, 0, keysize);
-                Array.Copy(ciphertext, keysize * 3, block4, 0, keysize);
-
-                double distance = (double)(hemmingDistance(block1, block2) + hemmingDistance(block3, block4)) / 2;
-                double normalised = distance / keysize;
-
-                // This is for debugging if required
-                //Console.WriteLine("Keysize {0}: Distance between {1} and {2} is {3}; distance between {4} and {5} is {6}; average is {7} and normalised is {8}",
-                //    keysize,
-                //    Encoding.UTF8.GetString(block1),
-                //    Encoding.UTF8.GetString(block2),
-                //    hemmingDistance(block1, block2),
-                //    Encoding.UTF8.GetString(block3),
-                //    Encoding.UTF8.GetString(block4),
-                //    hemmingDistance(block3, block4),
-                //    distance,
-                //    normalised);
-
-                //Console.WriteLine("For comparison: without averaging, based on first two blocks, it would be {0}",
-                //    (double)hemmingDistance(block1, block2) / keysize);
-
-                if (normalised < highScore)
+                // Calculate hamming distance between every pair of blocks in the file
+                // Then get the overall average.
+                // More data = more accuracy.
+                for (int index = 0; index<blocksInText-1; index += 2)
                 {
-                    guess = keysize;
-                    highScore = normalised;
+                    byte[] block1 = new byte[keysize],
+                        block2 = new byte[keysize];
+
+                    Array.Copy(ciphertext, index * keysize, block1, 0, keysize);
+                    Array.Copy(ciphertext, (index + 1) * keysize, block2, 0, keysize);
+                    hammings[index] = hammingDistance(block1, block2) / keysize;
                 }
+
+                double averageHamming = Queryable.Average(hammings.AsQueryable());
+
+                likelyKeys.Add(keysize, averageHamming);
+
             }
 
-            Console.WriteLine("Best guess at keylength: {0}", guess);
+            // For debugging - gives an ordered list of keys
+            var ordered = likelyKeys.OrderBy(x => x.Value);
 
-            return guess;
+            foreach (KeyValuePair<int, double> item in likelyKeys)
+            {
+                if (item.Value < result.Value) result = item;
+            }
+
+            Console.WriteLine("Guessed keysize: {0}", result);
+            return result.Key;
         }
 
-        static int hemmingDistance(byte[] barray1, byte[] barray2)
+        static int hammingDistance(byte[] barray1, byte[] barray2)
         {
             byte[] xorResult = xorByteArrays(barray1, barray2);
 
@@ -166,6 +164,11 @@ namespace Cryptopals
             }
 
             return barray;
+        }
+
+        static byte[] base64ToBytes(string base64)
+        {
+            return Convert.FromBase64String(base64);
         }
 
         static string prettyPrint16(byte[] barray)
@@ -223,7 +226,21 @@ namespace Cryptopals
                 { "r", 0.05987 },
                 { "d", 0.04253 },
                 { "l", 0.04025 },
-                { "u", 0.02758 }
+                { "u", 0.02758 },
+                { "w", 0.0256 },
+                { "m", 0.02406 },
+                { "f", 0.02228 },
+                { "c", 0.02202 },
+                { "g", 0.02015 },
+                { "y", 0.01994 },
+                { "p", 0.01929 },
+                { "b", 0.01492 },
+                { "k", 0.01292 },
+                { "v", 0.00978 },
+                { "j", 0.00153 },
+                { "x", 0.0015 },
+                { "q", 0.00095 },
+                { "z", 0.00077 }
             };
 
             // Test range of possible single character keys
@@ -270,7 +287,7 @@ namespace Cryptopals
             // Constructs:
             // 1. A list of test plain texts using every possible key - for the frequencyAnalysis function
             // 2. A dictionary of the plain texts associated with their keys - so that we can identify the key
-            for (int i = 32; i < 127; i++)
+            for (int i = 0; i < 127; i++)
             {
                 byte[] testKey = { Convert.ToByte(i) };
                 string testPlainText = System.Text.Encoding.UTF8.GetString(xorByteArrays(cipherBytes, testKey));
